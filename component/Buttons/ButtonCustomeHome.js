@@ -39,6 +39,6 @@ const BCHStyle = StyleSheet.create({
         padding: 18,
         justifyContent: 'space-around',
         alignItems: 'center',
-        marginTop: 40,
+        marginTop: 20,
     }
 }) 

@@ -4,12 +4,18 @@ import { SafeAreaView,View,Text,StyleSheet,Dimensions,Image,Button } from 'react
 import {ButtonCustomeHome} from '../Buttons/ButtonCustomeHome.js'
 import { connect } from 'react-redux'
 import {AvatarImage} from '../AvatarImage'
+import {ButtonCalendarHome} from '../Buttons/ButtonCalendarHome'
+import { ScrollView } from 'react-native'
+import { ButtonCustomeOrange } from '../Buttons/ButtonCustomeOrange.js'
+import {ButtonExtra} from '../Buttons/ButtonExtra'
+
 
 const {width} = Dimensions.get('window')
 
 const Home = ({navigation, avatarData, name}) => {
 
     const [avatar,setAvatar] = useState(avatarData)
+    const [morOpt,setMorOpt]=useState(false)
     console.log(avatar)
 
     useEffect(()=>{
@@ -27,6 +33,10 @@ const Home = ({navigation, avatarData, name}) => {
 
     const switchAvatarChanger = () => {
         navigation.navigate('avatar_changer')
+    }
+
+    const switchCalendar = () => {
+        navigation.navigate('calendar')
     }
 
     return (
@@ -50,8 +60,21 @@ const Home = ({navigation, avatarData, name}) => {
                 <Text style={HomeStyle.h_txt_name}>{name}</Text>
             </View>
 
-            <ButtonCustomeHome title={"Como te encuentras hoy?"} orientation={"row"} illustration={"RD"} text={"Completa y cuentanos como te has sentido"} color={"#A476FC"} handlePress={switchDailyRegister}/>
-            <ButtonCustomeHome title={"No te encuentras bien?"} orientation={"row-reverse"} text={"Completa y cuentanos que te sucede!"} color={"#7685FC"} handlePress={switchSymptomsRegister}/>
+            <View style={HomeStyle.h_scroll_buttons}>
+                {morOpt?
+                <View style={{alignItems:'center'}}>
+                    <ButtonCalendarHome handleFunction={()=>switchCalendar()}/>
+                    <ButtonExtra handleFunction={()=>setMorOpt(!morOpt)}/>
+                </View>
+                :
+                <View style={{alignItems:'center'}}>
+                <ButtonCustomeHome title={"Como te encuentras hoy?"} orientation={"row"} illustration={"RD"} text={"Completa y cuentanos como te has sentido"} color={"#A476FC"} handlePress={switchDailyRegister}/>
+                <ButtonCustomeHome title={"No te encuentras bien?"} orientation={"row-reverse"} text={"Completa y cuentanos que te sucede!"} color={"#7685FC"} handlePress={switchSymptomsRegister}/>
+                <ButtonExtra handleFunction={()=>setMorOpt(!morOpt)}/>
+                </View>
+                }
+            </View>
+
             <Pressable style={HomeStyle.h_btn_logout} onPress={()=>{navigation.navigate('login')}}>
                 <Text style={HomeStyle.h_txt_logout}>Log out</Text>
             </Pressable>
@@ -59,6 +82,13 @@ const Home = ({navigation, avatarData, name}) => {
     )
 }
 const HomeStyle = StyleSheet.create({
+    h_scroll_buttons:{
+        marginTop:'5%',
+        height:'60%',
+        width:'100%',
+        alignContent:'center',
+        alignItems:'center'
+    },
     h_txt_logout:{
         color:'#FFFFFF'
     },
