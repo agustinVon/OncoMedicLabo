@@ -41,6 +41,42 @@
           ]
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497357435658:android:30fbefa3acb99dc7fc40f3",
+        "android_client_info": {
+          "package_name": "com.oncomedic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497357435658-js6ekdsm77p4rdnp8kev6noj95kukql6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9R2yyz_8uEWmVn1-_caW81W7kiS3QdXo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497357435658-js6ekdsm77p4rdnp8kev6noj95kukql6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "497357435658-kp1repf7cae3lh5222ieb1kagb937fcc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.OncoMedic"
+              }
+            }
+          ]
+        }
+      }
     }
   ],
   "configuration_version": "1"
