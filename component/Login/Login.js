@@ -9,6 +9,7 @@ import {useFocusEffect} from '@react-navigation/native'
 import {ActivityIndicator} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {CommonActions} from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
 
 
 const {width} = Dimensions.get("window")
@@ -20,12 +21,33 @@ const Login = ({navigation, setUser}) => {
     const [password,setPassword] = useState("")
     const [passwordHidden, setHidPas] = useState(true)
     const [isLoading,setIsLoading] = useState(false)
+    const [notificationsAtuh,setNotif] = useState(false)
 
     useFocusEffect(
         React.useCallback(()=>{
             logoutUser()
         })
     )
+
+    async function requestUserPermission() {
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    
+        if (enabled) {
+          console.log('Authorization status:', authStatus);
+          setNotif(true)
+        }
+    }
+
+    
+
+    useEffect(()=>{
+        if(!notificationsAtuh){
+            requestUserPermission()
+        }
+    },[notificationsAtuh])
 
     const handleSwitchToRegister = () =>{
         navigation.navigate('register')
@@ -34,7 +56,7 @@ const Login = ({navigation, setUser}) => {
     const switchToHome = async () =>{
         setIsLoading(true)
         return await firestore()
-        .collection('users')
+        .collection('testUsers')
         .doc(id).get().then((doc)=>{
             if(doc.exists && doc.data().password==password && doc.data().status=='Activo'){
                 setUser(doc.data())
@@ -57,6 +79,28 @@ const Login = ({navigation, setUser}) => {
                     ]
                 )
             }
+        }).catch(err =>{
+            Alert.alert(
+                "Error",
+                "No se pudo conectar a base de datos",
+                [
+                    {
+                        text: 'OK',
+                    }
+                ]
+            )
+        })
+    }
+
+    const emergency = async () =>{
+        setIsLoading(true)
+        return await firestore()
+        .collection('users')
+        .doc('11111111').get().then((doc)=>{
+            console.log(doc.data())
+            setUser(doc.data())
+            setIsLoading(false)
+            navigation.navigate('registro_sintoma')
         }).catch(err =>{
             Alert.alert(
                 "Error",
@@ -127,6 +171,7 @@ const Login = ({navigation, setUser}) => {
                         //TEST SWITCHHOME
                     }
                     <ButtonCustomeOrange  title="Iniciar sesion" handleFunction={switchToHome}/>
+                    <Button onPress={emergency} title={'Se encuentra en una emergencia?'}/>
                     <Pressable style={LoginStyle.log_cont_register} onPress={handleSwitchToRegister}>
                         <Text>No tienes cuenta?</Text>
                         <Text style={LoginStyle.log_text_register}> Registrate!</Text>

@@ -21,7 +21,7 @@ const RegisterIllustrator = ({navigation,userData,goHomeFunction}) => {
 
         userDocument != null ?
         firestore()
-        .collection('users')
+        .collection('testUsers')
         .doc(user.id)
         .set({
             ...user

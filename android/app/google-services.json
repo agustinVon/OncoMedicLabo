@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "497357435658",
+    "firebase_url": "https://oncologia-austral-default-rtdb.firebaseio.com",
+    "project_id": "oncologia-austral",
+    "storage_bucket": "oncologia-austral.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:497357435658:android:fb254df511547c22fc40f3",
+        "android_client_info": {
+          "package_name": "com.example.apphospital"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "497357435658-js6ekdsm77p4rdnp8kev6noj95kukql6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9R2yyz_8uEWmVn1-_caW81W7kiS3QdXo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "497357435658-js6ekdsm77p4rdnp8kev6noj95kukql6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "497357435658-kp1repf7cae3lh5222ieb1kagb937fcc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.OncoMedic"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

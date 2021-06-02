@@ -49,7 +49,7 @@ const DailyRegister = ({navigation,idR}) => {
         setLoading(true)
         const date = new Date()
         const userDocument = firestore()
-        .collection('diaryReg')
+        .collection('testDiaryReg')
         .doc(id +'EN'+ date.getDate() +'DE'+ date.getMonth() +'DE'+ date.getFullYear())
         .set({
             date:date,

@@ -65,7 +65,7 @@ const SymptomRegister = ({navigation,idR,cancer}) => {
         setIsLoading(true)
         const date = new Date()
         const userDocument = firestore()
-        .collection('symptoms')
+        .collection('testSymptoms')
         .add({
             id:id,
             symptom:symptom.label,
