@@ -1,5 +1,5 @@
 import React,{useEffect, useState} from 'react'
-import {SafeAreaView,Image,StyleSheet,Dimensions,View,Text,TextInput,Pressable,Modal,Button } from 'react-native'
+import {SafeAreaView,Image,StyleSheet,Dimensions,View,Text,TextInput,Pressable,Modal,Button ,Linking} from 'react-native'
 import {ButtonCustomeOrange} from '../Buttons/ButtonCustomeOrange.js'
 import firestore from '@react-native-firebase/firestore';
 import {setUser, logoutUser} from '../../reduxStore/actions/registerAction'
@@ -8,8 +8,6 @@ import { Alert } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native'
 import {ActivityIndicator} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/AntDesign';
-import {CommonActions} from '@react-navigation/native';
-import messaging from '@react-native-firebase/messaging';
 
 
 const {width} = Dimensions.get("window")
@@ -17,11 +15,16 @@ const {height} = Dimensions.get("window")
 
 const Login = ({navigation, setUser}) => {
     const [modalVisible, setModalVisible] = useState(false);
+    const [modalchangeContra, setModalchangeContra] = useState(false);
     const [id,setId]=useState("")
     const [password,setPassword] = useState("")
     const [passwordHidden, setHidPas] = useState(true)
     const [isLoading,setIsLoading] = useState(false)
-    const [notificationsAtuh,setNotif] = useState(false)
+    const [code,setCode] = useState(false)
+    const [newPass,setNewPass] = useState('')
+    const [incorrect,setIncorrect] = useState('')
+    const [correct,setCorrect] = useState(false)
+    const [incorrectid,setincorrectid] = useState(false)
 
     useFocusEffect(
         React.useCallback(()=>{
@@ -29,25 +32,30 @@ const Login = ({navigation, setUser}) => {
         })
     )
 
-    async function requestUserPermission() {
-        const authStatus = await messaging().requestPermission();
-        const enabled =
-          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-    
-        if (enabled) {
-          console.log('Authorization status:', authStatus);
-          setNotif(true)
+    const sendIt =()=>{
+        Linking.openURL('https://161746c7.sibforms.com/serve/MUIEAFpS0VRg9Krk2dGLiXezjk6g2LMpJ-ust5q8aVfz_Torvu_F6Ux57BuISYuT2TYuwyg2dbE51a0cAkJNcBoyKKXiqqe6OpbZurN-GpbM3PyggeVRn7WmW0W1kbvoU7VPAbrSijMYouZMO8KTO_48xGy6yEmVU1xBNwKgDXNadrL25QBGkVUqXHR_ED7EPxLmLsTNkLqj18P-')
+        setModalVisible(true)
+    }
+
+    const changeContra = () => {
+        if (code!=="121AWFSDK"){
+            setIncorrect('Codigo incorrecto')
+        } else {
+            setCorrect(true)
+            setModalVisible(false)
+            setModalchangeContra(true)
         }
     }
 
-    
-
-    useEffect(()=>{
-        if(!notificationsAtuh){
-            requestUserPermission()
-        }
-    },[notificationsAtuh])
+    const changeThePassword = async () => {
+        const db = await firestore()
+         db.collection("testUsers").doc(id).update({
+            'password': newPass
+         }).catch(()=>{
+             setincorrectid(true)
+         })
+         setModalchangeContra(false)
+    }
 
     const handleSwitchToRegister = () =>{
         navigation.navigate('register')
@@ -55,7 +63,7 @@ const Login = ({navigation, setUser}) => {
 
     const switchToHome = async () =>{
         setIsLoading(true)
-        return await firestore()
+        await firestore()
         .collection('testUsers')
         .doc(id).get().then((doc)=>{
             if(doc.exists && doc.data().password==password && doc.data().status=='Activo'){
@@ -128,12 +136,37 @@ const Login = ({navigation, setUser}) => {
             >
                 <View style={styles.centeredView}>
                 <View style={styles.modalView}>
-                    <Text style={styles.modalText}>Proximamente va a funcionar</Text>
+                    <Text style={{color: 'red'}}>{incorrect}</Text>
+                    <TextInput style={{color: 'black'}} onChangeText={setCode} placeholderTextColor="black" placeholder="Ingrese el codigo"></TextInput>
                     <Pressable
                     style={[styles.button, styles.buttonClose]}
-                    onPress={() => setModalVisible(!modalVisible)}
+                    onPress={changeContra}
                     >
-                    <Text style={styles.textStyle}>Genial!</Text>
+                    <Text onPress={changeContra} style={styles.textStyle}>Aceptar</Text>
+                    </Pressable>
+                </View>
+                </View>
+            </Modal>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalchangeContra}
+                onRequestClose={() => {
+                Alert.alert("Modal has been closed.");
+                setModalchangeContra(!modalchangeContra);
+                }}
+            >
+                <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                    <Text  style={{color: 'red'}} >{incorrectid && "Id incorrecto"}</Text>
+                    <TextInput style={{color: 'black'}} onChangeText={setId} placeholderTextColor="black" placeholder="Ingrese su id"></TextInput>
+                    <TextInput style={{color: 'black'}} onChangeText={setNewPass} placeholderTextColor="black" placeholder="Ingrese su nueva contraseña"></TextInput>
+                    <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={changeThePassword}
+                    >
+                    <Text onPress={changeThePassword} style={styles.textStyle}>Aceptar</Text>
                     </Pressable>
                 </View>
                 </View>
@@ -161,7 +194,7 @@ const Login = ({navigation, setUser}) => {
                         </View>
                     </View>
                     <View style={LoginStyle.log_cont_olvcont}>
-                        <Pressable style={{width:300}} onPress={() => setModalVisible(true)}>
+                        <Pressable style={{width:300}} onPress={sendIt}>
                             <Text style={LoginStyle.log_olvcont}>
                                 ¿Olvidaste la contraseña?
                             </Text>
