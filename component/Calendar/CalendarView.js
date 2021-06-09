@@ -3,33 +3,45 @@ import { SafeAreaView,View,Text,StyleSheet,Dimensions,Image,Button } from 'react
 import {Calendar} from 'react-native-calendars';
 import firestore from '@react-native-firebase/firestore';
 import { connect } from 'react-redux';
+import { render } from 'react-dom';
 
 const CalendarView = ({navigation,id}) => {
 
     const [dates,setDates]= useState(null)
-    let datesFormat = {}
+    const [hour,setHour] = useState(null)
+    const [markedDates, setMarkedDates] = useState({})
+
+    
+
+    const [datesFormat,setDatesFormat] = useState({})
+    const [dateToHours, setDateToHours] = useState(new Map)
 
     const loadDates = async () =>{
         const auxDates = []
         return await firestore()
-        .collection('dates')
+        .collection('testDates')
         .where('id','==',id)
         .get().then((snapshot) =>{
-            snapshot.forEach(doc => {
-                auxDates.push(new Date(doc.data().date.toDate()))
+            snapshot.forEach((doc) => {
+                console.log('doc'+JSON.stringify(doc.data()))
+                console.log(doc.data().hour)
+                let date = new Date(doc.data().date.toDate())
+                auxDates.push(date)
+                dateToHours.set(date.toISOString().split('T')[0] , doc.data().hour)
+                console.log(dateToHours)
             })
             console.log(auxDates)
             setDates(auxDates)
         }) 
     }
 
-    const transformDatesToFormat = () =>{
+    const transformDatesToFormat = async () =>{
+        const aux = datesFormat
         dates.forEach((date) =>{
-            const today = new Date().toISOString().split('T')[0]
-            console.log(today)
             const val = date.toISOString().split('T')[0]
-            datesFormat[val]= {selected: true, selectedColor: 'violet'}
+            aux[val]= {selected: true, selectedColor: 'violet'}
         })
+        setDatesFormat(aux)
     }
 
     useEffect(async ()=>{
@@ -38,15 +50,19 @@ const CalendarView = ({navigation,id}) => {
             
         }
         else{
-            transformDatesToFormat()
+            await transformDatesToFormat()
+            console.log('transformed = '+ dateToHours)
         }
     },[dates])
+
+    useEffect(()=>{
+    },[datesFormat])
 
 
     return(
     <View style={CalStyle.background}>
-        {console.log(id)}
         <View style={CalStyle.back_img}>
+            {console.log('hora =' +hour)}
             <View  style={CalStyle.back_img}>
                 <Image style={CalStyle.img}source={require('../../img/back_home1.png')}/>
                 <View style={CalStyle.view}/>
@@ -59,7 +75,13 @@ const CalendarView = ({navigation,id}) => {
         </View>
         <Text style={CalStyle.title}>Citas Proximas: </Text>
         <View style={CalStyle.calendar_container}>
-            <Calendar markedDates={datesFormat}></Calendar>
+            <Calendar 
+            markedDates={datesFormat} 
+            onDayPress={async (day)=>{
+                setHour(dateToHours.get(day.dateString))
+                }}
+            />
+            {hour !== null && <Text style={{marginTop: 20}}>Hora = {hour}</Text>}     
         </View>
     </View>
     )

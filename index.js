@@ -12,6 +12,6 @@ import { Platform } from 'react-native';
 messaging().setBackgroundMessageHandler(async remoteMessage => {
     console.log('Message handled in the background!', remoteMessage);
 });
-messaging().getToken().then((value) => console.log(value));
+messaging().getToken().then((value) => console.log('token ='+value));
 
 AppRegistry.registerComponent(appName, () => App);

@@ -8,6 +8,8 @@ import { Alert } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native'
 import {ActivityIndicator} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/AntDesign';
+import {CommonActions} from '@react-navigation/native';
+import messaging from '@react-native-firebase/messaging';
 
 
 const {width} = Dimensions.get("window")
@@ -20,6 +22,7 @@ const Login = ({navigation, setUser}) => {
     const [password,setPassword] = useState("")
     const [passwordHidden, setHidPas] = useState(true)
     const [isLoading,setIsLoading] = useState(false)
+    const [notificationsAtuh,setNotif] = useState(false)
     const [code,setCode] = useState(false)
     const [newPass,setNewPass] = useState('')
     const [incorrect,setIncorrect] = useState('')
@@ -31,6 +34,27 @@ const Login = ({navigation, setUser}) => {
             logoutUser()
         })
     )
+
+    async function requestUserPermission() {
+        const authStatus = await messaging().requestPermission();
+        const enabled =
+          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+        if (enabled) {
+          console.log('Authorization status:', authStatus);
+          setNotif(true)
+        }
+    }   
+    
+    useEffect(()=>{
+        if(!notificationsAtuh){
+            requestUserPermission()
+        }
+        else{
+            console.log('notifications activated')
+        }
+    },[notificationsAtuh])     
 
     const sendIt =()=>{
         Linking.openURL('https://161746c7.sibforms.com/serve/MUIEAFpS0VRg9Krk2dGLiXezjk6g2LMpJ-ust5q8aVfz_Torvu_F6Ux57BuISYuT2TYuwyg2dbE51a0cAkJNcBoyKKXiqqe6OpbZurN-GpbM3PyggeVRn7WmW0W1kbvoU7VPAbrSijMYouZMO8KTO_48xGy6yEmVU1xBNwKgDXNadrL25QBGkVUqXHR_ED7EPxLmLsTNkLqj18P-')
@@ -101,25 +125,37 @@ const Login = ({navigation, setUser}) => {
     }
 
     const emergency = async () =>{
-        setIsLoading(true)
-        return await firestore()
-        .collection('users')
-        .doc('11111111').get().then((doc)=>{
-            console.log(doc.data())
-            setUser(doc.data())
-            setIsLoading(false)
-            navigation.navigate('registro_sintoma')
-        }).catch(err =>{
-            Alert.alert(
-                "Error",
-                "No se pudo conectar a base de datos",
-                [
-                    {
-                        text: 'OK',
-                    }
-                ]
-            )
+        await setUser({
+            name:"",
+            surname:"",
+            password:"",
+            email:"",
+            gender:"",
+            birth:"",
+            medic:"",
+            place:"",
+            etnia:"",
+            id:"default",
+            smoke:{
+                smoke:false,
+                time:"",
+                qnt:"",
+            },
+            dbt:{
+                dbt:false,
+                med:""
+            },
+            med:{
+                hip:false,
+                epoc:false,
+                acv:false,
+                inf:false
+            },
+            avatar:"1",
+            status:"Pendiente",
+            cancer:""
         })
+        navigation.navigate('registro_sintoma')
     }
 
     return (

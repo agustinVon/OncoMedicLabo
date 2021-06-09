@@ -64,7 +64,7 @@ const SymptomRegister = ({navigation,idR,cancer}) => {
     const firestoreSave = () =>{
         setIsLoading(true)
         const date = new Date()
-        const userDocument = firestore()
+        const userDocument = idR !== 'default' ? firestore()
         .collection('testSymptoms')
         .add({
             id:id,
@@ -78,7 +78,8 @@ const SymptomRegister = ({navigation,idR,cancer}) => {
         })
         .catch((error) => {
             navigation.navigate('fail',{e:error})
-        });
+        }):
+        navigation.navigate('login') 
     }
 
     const pushSymptoms = () =>{
