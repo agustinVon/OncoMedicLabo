@@ -13,7 +13,7 @@ export const RegisterElements = ({type,nextScreen}) => {
     const [image,setImage] = useState("")
 
     useEffect(() => {
-        typeRegister == "smoke" ? (setTextype("¿FUISTE/ERES FUMADOR?"),setTypeOption(["Fumo actualmente","Fumaba","No"]),setImage(require("../../img/ic_smoke.png"))) :
+        typeRegister == "smoke" ? (setTextype("¿FUÍSTE/ERES FUMADOR?"),setTypeOption(["Fumo actualmente","Fumaba","No"]),setImage(require("../../img/ic_smoke.png"))) :
         (setTextype("¿TIENES DIABETES?"),setTypeOption(["Si","No"]),setImage(require("../../img/ic_diabetic.png"))) 
     }, [typeRegister])
 
@@ -70,7 +70,7 @@ const RegisterElementStyle = StyleSheet.create({
         flex:1,
     },
     regelem_cont_top:{
-        paddingTop: 80,
+        paddingTop: 40,
         paddingBottom: 30,
         backgroundColor: "#B189F8",
         width,

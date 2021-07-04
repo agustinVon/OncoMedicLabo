@@ -7,27 +7,36 @@ import {ButtonAvatarSelection} from '../Buttons/ButtonAvatarSelection'
 import {setAvatarAction} from '../../reduxStore/actions/registerAction'
 import {AvatarImage} from '../AvatarImage'
 import firestore from '@react-native-firebase/firestore';
+import {Colors} from '../styles/Colors'
+import Icon from 'react-native-vector-icons/AntDesign';
+import {notifyMessage} from '../commonComponents/Modals/Notification'
 
 const AvatarChanger = ({navigation,avatarData,id,setAvatarAction}) => {
 
     const [avatar,setAvatar] = useState(avatarData)
     const [avatarSelected,setAvatarSelected] = useState(avatarData)
 
-    const updateToFireStore= () =>{
-        const userDocument = firestore()
-        .collection('users')
-        .doc(id)
-        .update({
-            avatar: avatar
-        })
-        .then(() => {
-            console.log('User avatar updated!');
-        })
+    const updateToFireStore= async () =>{
+
+        const userCollection = firestore().collection('users')
+        await userCollection.get().then(
+            (snapshot) => {
+                snapshot.forEach(doc => {
+                    if(id === doc.data().id){
+                        userCollection.doc(doc.id).update({
+                            avatar: avatar
+                        })
+                    }
+                })
+            })
     }
 
     useEffect(()=>{
-        setAvatarAction({avatar:avatar})
-        updateToFireStore()
+        if(avatar!=avatarData){
+            notifyMessage('Su avatar fué editado exitosamente')
+            setAvatarAction({avatar:avatar})
+            updateToFireStore()
+        }
     },[avatar])
 
     const returnPress = () =>{
@@ -38,18 +47,18 @@ const AvatarChanger = ({navigation,avatarData,id,setAvatarAction}) => {
         <SafeAreaView style={AvatarChangerStyle.avc_const_background}>
             <View style={AvatarChangerStyle.avc_back_img}>
                 <View  style={AvatarChangerStyle.avc_back_img}>
-                    <Image style={AvatarChangerStyle.avc_img}source={require('../../img/back_home1.png')}/>
+                    <Image style={AvatarChangerStyle.avc_img} resizeMode={'stretch'} source={require('../../img/back_home1.png') }/>
                     <View style={AvatarChangerStyle.avc_img_view}/>
                 </View>
                 <View  style={AvatarChangerStyle.avc_back_img}>
-                    <Image style={AvatarChangerStyle.avc_img}source={require('../../img/back_home2.png')}/>
+                    <Image style={AvatarChangerStyle.avc_img} resizeMode={'stretch'} source={require('../../img/back_home2.png')}/>
                     <View style={AvatarChangerStyle.avc_img_view2}/>
                 </View>              
             </View>
 
             <View style={AvatarChangerStyle.avc_return_buttonContainer}>
-                <Pressable zIndex={8000} style={AvatarChangerStyle.avc_return_button} onPress={()=> returnPress()}>
-                    <AvatarImage index={avatar} size={'small'}></AvatarImage>
+                <Pressable style={AvatarChangerStyle.avc_return_button} onPress={()=> returnPress()}>
+                    <Icon name={'arrowleft'} color={Colors.orange} size={30}/>
                 </Pressable>
             </View>
             
@@ -112,6 +121,7 @@ const AvatarChangerStyle = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     avc_img:{
+        width:'100%',
         position: "relative",
     },
     avc_img_view:{
@@ -125,8 +135,11 @@ const AvatarChangerStyle = StyleSheet.create({
         backgroundColor: "#EEE6FD",
     },
     avc_return_button:{
-        height:40,
-        width:40,
+        height:70,
+        width:70,
+        borderRadius:200,
+        zIndex:8000,
+        color: "#FFFFFF"
     },
     avc_return_buttonContainer:{
         position: 'absolute',
@@ -134,6 +147,10 @@ const AvatarChangerStyle = StyleSheet.create({
         left:0,
         marginTop:20,
         marginLeft: 20,
+        height:40,
+        width:40,
+        borderRadius:0,
+        color: Colors.orange
     },
     avc_main_view:{
         position: 'absolute',

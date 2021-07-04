@@ -21,8 +21,8 @@ export const DatePickerModal= ({visibility,setVisibility,date,setDate}) =>{
                         onDateChange={setDate}
                         maximumDate={new Date()}
                         mode={'date'}/>
-                        <View style={{width:'50%'}}>
-                            <ButtonCustomeOrange title={'PICK DATE'} handleFunction={()=>setVisibility(!visibility)}/>
+                        <View style={{width:'80%'}}>
+                            <ButtonCustomeOrange title={'SELECCIONAR FECHA'} handleFunction={()=>setVisibility(!visibility)}/>
                         </View>
                     </View>
                 </View>

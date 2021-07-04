@@ -1,11 +1,12 @@
-import React,{useState,useEffect,useRef,useContex} from 'react'
-import { SafeAreaView, View, ActivityIndicator } from 'react-native'
+import React,{useState,useEffect} from 'react'
+import { View, ActivityIndicator } from 'react-native'
 import  Swiper  from "react-native-swiper";
-import {DailyRegisterOptions} from './DailyRegisterOptions.js'
-import {DailyRegisterButtons} from './DailyRegisterButtons.js'
 import firestore from '@react-native-firebase/firestore';
 import { connect } from 'react-redux';
 import { Alert } from 'react-native';
+import {SliderButtons} from '../commonComponents/Sliders/SliderButtons'
+import {SliderType} from '../commonComponents/Sliders/SliderType'
+import {SliderOptions} from '../commonComponents/Sliders/SliderOptions'
 
 
 
@@ -13,35 +14,61 @@ const DailyRegister = ({navigation,idR}) => {
     const swiper = React.useRef(null);
 
     const [id,setId] = useState(idR)
-    const [mood,setMood] = useState("");
-    const [sad,setSad] = useState("")
+    const [mood,setMood] = useState('');
+    const [sad,setSad] = useState('')
     const [hungry,setHungry] = useState('');
     const [hid,setHid] = useState('');
     const [run,setRun] = useState('');
     const [social,setSocial] = useState('');
     const [isLoading, setLoading] = useState(false)
 
+    const buttonsText = {
+        Apetito:[{label:'Menos de lo normal', value:'Menos de lo normal'},
+                {label:'Normal',value:'Normal'},
+                {label:'Mas de lo normal',value:'Mas de lo normal'}],
+        Hidratacion:[{label:'Menos de 1L',value:'Menos de 1L'},
+                {label:'Entre 1L y 2L',value:'Entre 1L y 2L'},
+                {label:'Mas de 2L',value:'Mas de 2L'}],
+        ActividadFisica:[{label:'No',value:'No'},
+                {label:'Menos de 30 min',value:'Menos de 30 min'},
+                {label:'Entre 30 y 60 min',value:'Entre 30 y 60 min'}],
+        Social:[{label:'No. No vi a nadie',value:'No. No vi a nadie'},
+                {label:'Si. Limitado a pocas interacciones interpersonales',value:'Si. Limitado a pocas interacciones interpersonales'},
+                {label:'Si. Vi a conocidos y amigos mas de una hora',value:'Si. Vi a conocidos y amigos mas de una hora'},
+                {label:'Si. Vi a conocidos y amigos mas de 2 horas',value:'Si. Vi a conocidos y amigos mas de 2 horas'}]
+    }
+
     useEffect(()=>{
         setId(id)
     },[id])
 
     useEffect(() =>{
-        if(social != ''){
-            pushDR()
+        if(social !== '' ){
+            if(mood!=='' && sad !== '' && hungry !== '' && hid !== '' && run !== ''){
+                pushDR()
+            }
+            else{
+                Alert.alert(
+                    "Error",
+                    "Algunas preguntas del registro quedaron sin responder",
+                    [
+                        {
+                            text: 'OK',
+                        }
+                    ]
+                )
+            }
         }
     },[social])
 
-    const cant_screen = 5;
+    useEffect(()=>{
+        if(mood !== '' || sad !== '' || hungry !== '' || hid !== '' || run !== ''){
+            swiper.current.scrollBy(1)
+        }
+    },[mood,sad,hungry,hid,run])
+
 
     const swipeNext = (i) =>{
-        console.log('mood ' + mood)
-        console.log('sad '+sad)
-        console.log('hungry '+hungry)
-        console.log('hid '+ hid)
-        console.log('run ' + run)
-        console.log('social' + social)
-        console.log('--------------')
-
         swiper.current.scrollBy(1)
     }
 
@@ -49,7 +76,7 @@ const DailyRegister = ({navigation,idR}) => {
         setLoading(true)
         const date = new Date()
         const userDocument = firestore()
-        .collection('testDiaryReg')
+        .collection('diaryReg')
         .doc(id +'EN'+ date.getDate() +'DE'+ date.getMonth() +'DE'+ date.getFullYear())
         .set({
             date:date,
@@ -72,24 +99,40 @@ const DailyRegister = ({navigation,idR}) => {
     }
 
     return (
-        isLoading && 
+        <View style={{height:'100%', width:'100%', flex:1}}>
+        {isLoading &&
         <View style={{
         position: 'absolute',
         backgroundColor:'#707070',
+        zIndex:1000,
         opacity:0.7, 
         width:'100%',
         height:'110%',
         justifyContent:'center'}}>
         <ActivityIndicator animating={true} color={"#FFFFFF"} size='large' />
-        </View>,
+        </View>}
         <Swiper ref={swiper} loop={false} activeDotColor={"#FFB13A"}>
-            <DailyRegisterOptions type={"Que tan animado te encuentras hoy? \n (1 es muy mal 10 es muy bien)"} imageProp={require("../../img/ic_child.png")} switchSwiper={swipeNext} handleValue={setMood} index={0}/>
-            <DailyRegisterOptions type={"Sentiste algun dolor hoy?"} imageProp={require("../../img/ic_sad.png")} switchSwiper={swipeNext} handleValue={setSad} index={1}/>
-            <DailyRegisterButtons type={"A"} text={"¿Tuviste apetito?"}imageProp={require("../../img/ic_utensils.png")} switchSwiper={swipeNext} handleValue={setHungry} index={2}/>
-            <DailyRegisterButtons type={"H"} text={"¿Te hidrataste?"} imageProp={require("../../img/ic_water.png")} switchSwiper={swipeNext} handleValue={setHid} index={3}/>
-            <DailyRegisterButtons type={"AF"} text={'Hiciste actividad fisica?'} imageProp={require("../../img/ic_run.png")} switchSwiper={swipeNext} handleValue={setRun} index={4}/>
-            <DailyRegisterButtons type={"S"} text={"Tuviste contacto social?"} imageProp={require("../../img/ic_social.png")} switchSwiper={swipeNext} handleValue={setSocial} index={5}/>
+            <SliderOptions text={'¿Qué tan animado te encuentras hoy?'} 
+                image={require("../../img/ic_child.png")} setValue={setMood}
+                type={SliderType.daily}/>
+            <SliderOptions text={'¿Sentiste algun dolor hoy?'} 
+                image={require("../../img/ic_sad.png")} setValue={setSad}
+                type={SliderType.daily}/>
+            <SliderButtons options={buttonsText.Apetito} text={"¿Tuviste apetito?"}
+                image={require("../../img/ic_utensils.png")} setValue={setHungry} 
+                type={SliderType.daily}/>
+            <SliderButtons options={buttonsText.Hidratacion} text={"¿Te hidrataste?"}
+                image={require("../../img/ic_water.png")} setValue={setHid}
+                type={SliderType.daily}/>
+            <SliderButtons options={buttonsText.ActividadFisica} text={"¿Hiciste actividad física?"}
+                image={require("../../img/ic_run.png")} setValue={setRun}
+                type={SliderType.daily}/>
+            <SliderButtons options={buttonsText.Social} text={"¿Tuviste contacto social?"} 
+                image={require("../../img/ic_social.png")} setValue={setSocial}
+                type={SliderType.daily}/>
         </Swiper>
+        </View>
+        
     )
 }
 

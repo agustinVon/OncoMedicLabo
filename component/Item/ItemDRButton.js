@@ -1,17 +1,16 @@
 import React from 'react'
 import {Pressable,Text,StyleSheet} from 'react-native'
 
-const ItemDRButtons = ({item,switchSwiper,handlePress}) => {
+const ItemDRButtons = ({item,handlePress}) => {
 
 
     const optionSelected = (option) =>{
         handlePress(option);
-        switchSwiper()
     }
 
     return (
-        <Pressable style={ItemRegisterStyle.ireg_back} onPress={()=>optionSelected(item)}>
-            <Text style={ItemRegisterStyle.ireg_text}>{item}</Text>
+        <Pressable style={ItemRegisterStyle.ireg_back} onPress={()=>optionSelected(item.value)}>
+            <Text style={ItemRegisterStyle.ireg_text}>{item.label}</Text>
         </Pressable>
     )
 }

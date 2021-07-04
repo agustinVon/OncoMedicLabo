@@ -13,7 +13,7 @@ export const ItemRegisterRadio = ({title,handlePress}) => {
     
     return (
        
-        <SafeAreaView style={{marginTop: 40,}}>
+        <SafeAreaView>
             
             <Text style={IRIStyle.iris_text}>{title}</Text>
             <View style={IRIStyle.iris_cont_radio}>

@@ -18,7 +18,7 @@ export const SET_DAILYREGISTER_INFORMATION = "SET_DAILYREGISTER_INFORMATION";
 export const REGISTER_USER = "REGISTER_USER";
 export const ADD_DAILYREGISTER = "ADD_DAILYREGISTER";
 export const SET_USER="SET_USER";
-export const USER_LOGOUT="USER_LOGOUT";
+export const SET_USER_LOGOUT="SET_USER_LOGOUT";
 
 export const setPersonalInformationAction = (userData) =>{
     return{
@@ -28,13 +28,15 @@ export const setPersonalInformationAction = (userData) =>{
 }
 
 export const logoutUser = () =>{
+    console.log('userkmdmwkdmw')
     return{
-        type: USER_LOGOUT,
+        type: SET_USER_LOGOUT,
         payload: ''
     }
 }
 
 export const setUser = (userData) =>{
+    console.log('user Set')
     return{
         type: SET_USER,
         payload:userData

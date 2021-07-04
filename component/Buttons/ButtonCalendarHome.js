@@ -1,6 +1,6 @@
 import React from 'react'
 import { Pressable,Image,View,Text,StyleSheet } from 'react-native'
-import {colors} from '../values/colors'
+import {Colors} from '../styles/Colors'
 
 export const ButtonCalendarHome =({handleFunction})=>{
     return(
@@ -19,7 +19,7 @@ export const ButtonCalendarHome =({handleFunction})=>{
 
 const BCalHome = StyleSheet.create({
     background:{
-        backgroundColor:colors.violet,
+        backgroundColor:Colors.violet,
         width:330,
         height:140,
         borderRadius: 30,

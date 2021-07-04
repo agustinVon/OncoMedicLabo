@@ -13,10 +13,10 @@ const {width} = Dimensions.get("window")
 
 const RegisterElementsMore = ({type,nextScreen,setSmokeOptionAction,setMedOptionAction}) => {
     const [typeRegister,setType] = useState(type)
-    const smoke_q = ["¿Cantidad por dia?","¿Tiempo fumado?"]
-    const dbt_q = ["Insulina","Medicamento 2", "Medicamento 3"]
+    const smoke_q = ["¿Cantidad por dia?","¿Cuantos meses fumaste?"]
+    const dbt_q = ["Insulina","Metmorfina", "Otra"]
     const [image,setImage] = useState("")
-    const [med, setMed] = useState(["Hipertension","EPOC",
+    const [med, setMed] = useState(["Hipertensión","EPOC",
                                    "ACV","Infarto"])
     
     const [qnt, setQnt] = useState("")

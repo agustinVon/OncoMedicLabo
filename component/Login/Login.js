@@ -1,5 +1,5 @@
 import React,{useEffect, useState} from 'react'
-import {SafeAreaView,Image,StyleSheet,Dimensions,View,Text,TextInput,Pressable,Modal,Button ,Linking} from 'react-native'
+import {SafeAreaView,Image,StyleSheet,Dimensions,View,Text,TextInput,Pressable,Modal,Button } from 'react-native'
 import {ButtonCustomeOrange} from '../Buttons/ButtonCustomeOrange.js'
 import firestore from '@react-native-firebase/firestore';
 import {setUser, logoutUser} from '../../reduxStore/actions/registerAction'
@@ -8,154 +8,66 @@ import { Alert } from 'react-native';
 import {useFocusEffect} from '@react-navigation/native'
 import {ActivityIndicator} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/AntDesign';
+import {PasswordField} from '../commonComponents/Fields/PasswordField'
+import {CustomAlert} from '../commonComponents/Alerts/Alert'
 import {CommonActions} from '@react-navigation/native';
-import messaging from '@react-native-firebase/messaging';
+import {MailField} from '../commonComponents/Fields/MailField'
+import { hashPassword } from '../PasswordHash.js';
 
 
 const {width} = Dimensions.get("window")
 const {height} = Dimensions.get("window")
 
-const Login = ({navigation, setUser}) => {
+const Login = ({navigation, setUser, logoutUser}) => {
     const [modalVisible, setModalVisible] = useState(false);
-    const [modalchangeContra, setModalchangeContra] = useState(false);
-    const [id,setId]=useState("")
+    const [email,setEmail]=useState("")
     const [password,setPassword] = useState("")
-    const [passwordHidden, setHidPas] = useState(true)
+    const [firstTry, setFirstTry] = useState(true)
     const [isLoading,setIsLoading] = useState(false)
-    const [notificationsAtuh,setNotif] = useState(false)
-    const [code,setCode] = useState(false)
-    const [newPass,setNewPass] = useState('')
-    const [incorrect,setIncorrect] = useState('')
-    const [correct,setCorrect] = useState(false)
-    const [incorrectid,setincorrectid] = useState(false)
 
     useFocusEffect(
         React.useCallback(()=>{
+            console.log('user loaded out')
             logoutUser()
         })
     )
-
-    async function requestUserPermission() {
-        const authStatus = await messaging().requestPermission();
-        const enabled =
-          authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-          authStatus === messaging.AuthorizationStatus.PROVISIONAL;
-
-        if (enabled) {
-          console.log('Authorization status:', authStatus);
-          setNotif(true)
-        }
-    }   
-    
-    useEffect(()=>{
-        if(!notificationsAtuh){
-            requestUserPermission()
-        }
-        else{
-            console.log('notifications activated')
-        }
-    },[notificationsAtuh])     
-
-    const sendIt =()=>{
-        Linking.openURL('https://161746c7.sibforms.com/serve/MUIEAFpS0VRg9Krk2dGLiXezjk6g2LMpJ-ust5q8aVfz_Torvu_F6Ux57BuISYuT2TYuwyg2dbE51a0cAkJNcBoyKKXiqqe6OpbZurN-GpbM3PyggeVRn7WmW0W1kbvoU7VPAbrSijMYouZMO8KTO_48xGy6yEmVU1xBNwKgDXNadrL25QBGkVUqXHR_ED7EPxLmLsTNkLqj18P-')
-        setModalVisible(true)
-    }
-
-    const changeContra = () => {
-        if (code!=="121AWFSDK"){
-            setIncorrect('Codigo incorrecto')
-        } else {
-            setCorrect(true)
-            setModalVisible(false)
-            setModalchangeContra(true)
-        }
-    }
-
-    const changeThePassword = async () => {
-        const db = await firestore()
-         db.collection("testUsers").doc(id).update({
-            'password': newPass
-         }).catch(()=>{
-             setincorrectid(true)
-         })
-         setModalchangeContra(false)
-    }
 
     const handleSwitchToRegister = () =>{
         navigation.navigate('register')
     }
 
     const switchToHome = async () =>{
-        setIsLoading(true)
-        await firestore()
-        .collection('testUsers')
-        .doc(id).get().then((doc)=>{
-            if(doc.exists && doc.data().password==password && doc.data().status=='Activo'){
-                setUser(doc.data())
-                setIsLoading(false)
-                navigation.navigate('home')
-            }
-            else if(doc.exists && doc.data().password==password && doc.data().status!='Activo'){
-                setIsLoading(false)
-                navigation.navigate('wait_screen')
-            }
-            else{
-                setIsLoading(false)
-                Alert.alert(
-                    "Error",
-                    "Usuario no existe o contraseña incorrecta",
-                    [
-                        {
-                            text: 'OK',
-                        }
-                    ]
-                )
-            }
-        }).catch(err =>{
-            Alert.alert(
-                "Error",
-                "No se pudo conectar a base de datos",
-                [
-                    {
-                        text: 'OK',
-                    }
-                ]
-            )
-        })
+        setFirstTry(false)
+        if(email !== '' || password !== ''){
+            hashPassword(password,login)
+        }
     }
 
-    const emergency = async () =>{
-        await setUser({
-            name:"",
-            surname:"",
-            password:"",
-            email:"",
-            gender:"",
-            birth:"",
-            medic:"",
-            place:"",
-            etnia:"",
-            id:"default",
-            smoke:{
-                smoke:false,
-                time:"",
-                qnt:"",
-            },
-            dbt:{
-                dbt:false,
-                med:""
-            },
-            med:{
-                hip:false,
-                epoc:false,
-                acv:false,
-                inf:false
-            },
-            avatar:"1",
-            status:"Pendiente",
-            cancer:""
-        })
-        navigation.navigate('registro_sintoma')
+    const login = async (hashedPassword) =>{
+        const userCollection = firestore().collection('users')
+        await userCollection.where('email' , '==' , email).where('password' , '==' , hashedPassword).get().then(
+            (snapshot) => {
+                if(snapshot.size>0){
+                    snapshot.forEach(async (doc) =>{
+                        if(doc.data().status === 'Pendiente'){
+                            setIsLoading(false)
+                            navigation.navigate('wait_screen')
+                        }else{
+                            setUser(doc.data())
+                            setIsLoading(false)
+                            navigation.navigate('home')
+                            userCollection.doc(doc.id).update({
+                                lastConnection: new Date()
+                            })
+                        }   
+                    })
+                }
+                else{
+                    setIsLoading(false)
+                    CustomAlert('Error', 'Usuario o contraseña incorrecta')
+                }
+            }
+        )
     }
 
     return (
@@ -172,37 +84,12 @@ const Login = ({navigation, setUser}) => {
             >
                 <View style={styles.centeredView}>
                 <View style={styles.modalView}>
-                    <Text style={{color: 'red'}}>{incorrect}</Text>
-                    <TextInput style={{color: 'black'}} onChangeText={setCode} placeholderTextColor="black" placeholder="Ingrese el codigo"></TextInput>
+                    <Text style={styles.modalText}>Proximamente va a funcionar</Text>
                     <Pressable
                     style={[styles.button, styles.buttonClose]}
-                    onPress={changeContra}
+                    onPress={() => setModalVisible(!modalVisible)}
                     >
-                    <Text onPress={changeContra} style={styles.textStyle}>Aceptar</Text>
-                    </Pressable>
-                </View>
-                </View>
-            </Modal>
-
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={modalchangeContra}
-                onRequestClose={() => {
-                Alert.alert("Modal has been closed.");
-                setModalchangeContra(!modalchangeContra);
-                }}
-            >
-                <View style={styles.centeredView}>
-                <View style={styles.modalView}>
-                    <Text  style={{color: 'red'}} >{incorrectid && "Id incorrecto"}</Text>
-                    <TextInput style={{color: 'black'}} onChangeText={setId} placeholderTextColor="black" placeholder="Ingrese su id"></TextInput>
-                    <TextInput style={{color: 'black'}} onChangeText={setNewPass} placeholderTextColor="black" placeholder="Ingrese su nueva contraseña"></TextInput>
-                    <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={changeThePassword}
-                    >
-                    <Text onPress={changeThePassword} style={styles.textStyle}>Aceptar</Text>
+                    <Text style={styles.textStyle}>Genial!</Text>
                     </Pressable>
                 </View>
                 </View>
@@ -213,24 +100,20 @@ const Login = ({navigation, setUser}) => {
             <View style={LoginStyle.log_cont_login}>
                 <View style={LoginStyle.log_cont_login_inside}>
                     <Text style={LoginStyle.log_text_log}>Iniciar</Text>
-                    <Text style={LoginStyle.log_text_in}>Sesion</Text>
+                    <Text style={LoginStyle.log_text_in}>Sesión</Text>
                 </View>
                 <View style={LoginStyle.log_cont_login_inputs}>
-                    <View>
-                        <Text style={LoginStyle.log_text_upinput}>ID de paciente</Text>
-                        <View style={LoginStyle.log_text_container}>
-                            <TextInput onChangeText={setId} placeholderTextColor="#c4c4c4" placeholder="Ingrese su ID de paciente" style={LoginStyle.log_textInput}></TextInput>
-                        </View>
+                    <View style={{alignSelf:'center'}}>
+                        <Text style={LoginStyle.log_text_upinput}>Email</Text>
+                        <MailField marginTop={0} setValue={setEmail} incomplete={!firstTry && email === ''}/>
                     </View>
-                    <View style={{marginTop: 20}}>
+                    
+                    <View style={{marginTop: 20, alignSelf:'center'}}>
                         <Text style={LoginStyle.log_text_upinput}>Constraseña</Text>
-                        <View style={LoginStyle.log_text_container}>
-                            <TextInput secureTextEntry={passwordHidden} onChangeText={setPassword} placeholderTextColor="#c4c4c4" placeholder="Ingrese su contraseña" style={LoginStyle.log_textInput}></TextInput>
-                            <Icon.Button name={passwordHidden?'eye':'eyeo'}  color={'#AAAAAA'} style={LoginStyle.log_icon_style} onPress={()=>setHidPas(!passwordHidden)}/>
-                        </View>
+                        <PasswordField setValue={setPassword} failToggle={false} incomplete={!firstTry && password === ''}/>
                     </View>
                     <View style={LoginStyle.log_cont_olvcont}>
-                        <Pressable style={{width:300}} onPress={sendIt}>
+                        <Pressable style={{width:300}} onPress={() => setModalVisible(true)}>
                             <Text style={LoginStyle.log_olvcont}>
                                 ¿Olvidaste la contraseña?
                             </Text>
@@ -240,7 +123,6 @@ const Login = ({navigation, setUser}) => {
                         //TEST SWITCHHOME
                     }
                     <ButtonCustomeOrange  title="Iniciar sesion" handleFunction={switchToHome}/>
-                    <Button onPress={emergency} title={'Se encuentra en una emergencia?'}/>
                     <Pressable style={LoginStyle.log_cont_register} onPress={handleSwitchToRegister}>
                         <Text>No tienes cuenta?</Text>
                         <Text style={LoginStyle.log_text_register}> Registrate!</Text>
@@ -317,6 +199,7 @@ const LoginStyle = StyleSheet.create({
         flexDirection: 'column',
         width:300,
         marginTop: 20,
+        alignSelf:'center',
     },
     log_top_color:{
         backgroundColor:"#B189F8",
@@ -348,9 +231,11 @@ const LoginStyle = StyleSheet.create({
     },
     log_cont_login:{
         marginTop: 20,
+        alignSelf:'center',
     },
     log_cont_login_inside:{
         flexDirection: 'row',  
+        alignItems:'center',
     },
     log_cont:{
         width,
@@ -359,6 +244,7 @@ const LoginStyle = StyleSheet.create({
         flexDirection: 'column',
         backgroundColor:"#FFFFFF",
         alignItems: 'center',
+        alignSelf:'center'
     }
 })
 

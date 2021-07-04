@@ -7,9 +7,10 @@ export const AvatarImage = ({index,size}) => {
 
     const [avatarHasL, setAvatarHasl]= useState(false)
     const [avatars, setAvatars]=useState([])
+    const trueIndex = index-1
 
     function compareAvatars(a,b){
-        return a.id - b.id
+        return (a.id - b.id)
     }
 
     const getAvatars = async()=>{
@@ -33,14 +34,14 @@ export const AvatarImage = ({index,size}) => {
         })
     }  
 
-    if(avatarHasL && index < avatars.length){
-        if(index < avatars.length){
-            console.log(avatars[index])
-            return <Image style={size=='small'?AvatarStyle.small:size=='medium'?AvatarStyle.medium:AvatarStyle.big} source={{uri:avatars[index].url}}></Image>
-        }
+    if(avatarHasL && trueIndex < avatars.length){
+        
+        console.log()
+        return <Image style={size=='small'?AvatarStyle.small:size=='medium'?AvatarStyle.medium:AvatarStyle.big} source={{uri:avatars[trueIndex].url}}></Image>
+        
     }
     else{
-        return <Image style={size=='small'?AvatarStyle.small:size=='medium'?AvatarStyle.medium:AvatarStyle.big} source={require('../img/avatar/avatar1.png')}></Image>
+        return <Image style={size=='small'?AvatarStyle.small:size=='medium'?AvatarStyle.medium:AvatarStyle.big} source={require('../img/avatar/defaultAvatar.png')}></Image>
     }
 }
 

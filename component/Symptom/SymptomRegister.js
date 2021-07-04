@@ -1,6 +1,7 @@
 import React, {useState,useEffect } from 'react'
 import { Pressable } from 'react-native'
 import { View,StyleSheet,Image,Text,Dimensions } from 'react-native'
+import {useFocusEffect} from '@react-navigation/native'
 import DropDownPicker from 'react-native-dropdown-picker'
 import { ButtonCustomeOrange } from '../Buttons/ButtonCustomeOrange'
 import { connect } from 'react-redux';
@@ -9,29 +10,36 @@ import { Alert } from 'react-native'
 import {ActivityIndicator} from 'react-native-paper';
 import {SearchPicker} from '../commonComponents/Pickers/SearchPicker'
 import {CustomPicker} from '../commonComponents/Pickers/CommonPicker'
+import {setSymptomRedux} from '../../reduxStore/actions/symptomActions'
+import { set } from 'react-native-reanimated'
 
 const {width} = Dimensions.get('window')
 
 
-const SymptomRegister = ({navigation,idR,cancer}) => {
+const SymptomRegister = ({navigation,idR,symptoms,cancer,setSymptomRedux,route}) => {
 
+    const {preSymptom , preGrade} = route.params
+    const [viewIsOn,setView] = useState(true)
+    const [pickerOpen,setPickerOpen] = useState(false)
     const [id,setId] = useState(idR)
-    const [symptom,setSymptom] = useState({label:null,value:null,description:null,gravity:null})
+    const [symptom,setSymptom] = useState(null)
+    const [symptomLock,setLock]= useState(false)
     const [grade,setGrade]= useState(null)
-    const [currentGrades,setCurrentGrades]= useState([])
+    const [gradeName,setGradeName] = useState(null)
     const [symptomIsLoaded,setSymptomIsLoaded] = useState(false)
-    const [sLoaded,setSLoaded]=useState([{label: 'LOADING', value:'null',descripcion: 'null',gravity:[{label:'LOADING',value:'0'}]}])
-    const [isLoading, setIsLoading]= useState(false)
+    const [sLoaded,setSLoaded]=useState([{label: 'LOADING', value:'null', description:'null', gravity:[{label:'Loading',value:0}]}])
+
+    console.log('initial state= ' +symptomIsLoaded)
 
     const getSymptoms = async()=>{
+        let i=0
         const sL = []
         const sLDb = firestore().collection('mainSymptoms')
         await sLDb.get().then(
             (snapshot) => {
                 snapshot.forEach(doc => {
-                    console.log(doc.data().label)
                     if (doc.data().cancer==cancer|| doc.data().cancer=='comun' ){
-                        sL.push({label:doc.data().label,value:doc.data().value,descripcion:doc.data().descripcion,gravity:doc.data().gravity})
+                        sL.push({label:doc.data().label,value:++i,description:doc.data().descripcion,gravity:doc.data().gravity})
                     } 
                 })
             }
@@ -39,51 +47,61 @@ const SymptomRegister = ({navigation,idR,cancer}) => {
         setSLoaded(sL)
     }
 
-    useEffect(() => {
-        if(symptom.value != null){
-            setCurrentGrades(symptom.gravity)
-        }
-    },[symptom])
+    useFocusEffect(
+        React.useCallback(()=>{
+            if(preSymptom !== null && symptomIsLoaded && !viewIsOn){
+                console.log('presintoma = ' + preSymptom)
+                sLoaded.forEach(symp =>{
+                    if(symp.label===preSymptom){
+                        setSymptom(symp)
+                    }
+                })
+                console.log(symptom)
+                setGrade(preGrade)
+                setLock(true)
+                setView(true)
+            }
+            else if(preSymptom ===null && symptomIsLoaded && !viewIsOn){
+                setView(true)
+            }
+        })
+    )
 
     useEffect(() => {
-        if(symptomIsLoaded==false){
+        if(symptomIsLoaded===false){
             getSymptoms().then(
                 setSymptomIsLoaded(!symptomIsLoaded)
             )
-        }  
+        }
     },[symptomIsLoaded])
-    
-    useEffect(() => {
-        setGrade(null)
-    },[currentGrades])
+
+
+    useEffect(()=>{  
+        console.log('sintoma = '+symptom)
+        if(symptom !== null){
+            setGrade(symptom.gravity[0].value)
+        }
+        else{
+            setGrade(null)
+            setSymptom(null)
+        }
+    },[symptom])
 
     useEffect(()=>{
         setId(id)
     },[id])
 
-    const firestoreSave = () =>{
-        setIsLoading(true)
-        const date = new Date()
-        const userDocument = idR !== 'default' ? firestore()
-        .collection('testSymptoms')
-        .add({
-            id:id,
-            symptom:symptom.label,
-            grade:grade,
-            date:date,
-            cancer:cancer
-        })
-        .then((docRef) => {
-            navigation.navigate('status',{text:"Registro de sintomas"})
-        })
-        .catch((error) => {
-            navigation.navigate('fail',{e:error})
-        }):
-        navigation.navigate('login') 
-    }
+    useEffect(()=>{
+        if(grade!==null){
+            symptom.gravity.forEach((gr) =>{
+                gr.value === grade && setGradeName(gr.label)
+            })
+        }
+    },[grade])
 
     const pushSymptoms = () =>{
-        if(grade == null || symptom == {label:null,value:null,description:null,gravity:null}){
+        //TODO cambiar alert
+        if(grade === null){
             Alert.alert(
                 "Error",
                 "Seleccione un sintoma y un grado",
@@ -95,58 +113,52 @@ const SymptomRegister = ({navigation,idR,cancer}) => {
             )
         }
         else{
-            if(grade>5){
-                console.log('fue activado')
-                console.log(grade)
-                Alert.alert(
-                    "Advertencia",
-                    "Se sugiere su visita a un hospital",
-                    [
-                        {
-                            text: 'OK',
-                            onPress:() => firestoreSave()
-                        }
-                    ]
-                )
-            }else{
-                firestoreSave()
-            }
+            const auxiliarSymptoms = symptoms
+            auxiliarSymptoms.set(key=symptom.label,value={symptom:symptom.label,grade:grade,gradeName:gradeName})
+            setSymptomRedux(auxiliarSymptoms)
+            navigation.navigate('symp_summary')
+            setSymptom(null)
+            setLock(false)
+            setView(false)
         }
-    }
-
-    const pickedSymptom = (item) =>{
-        
     }
 
     return (
         <View style={SymptomStyle.symptom_generalView}>
-            <View style={SymptomStyle.symptom_topView} >
+            <View style={pickerOpen? SymptomStyle.symptom_topView_p:SymptomStyle.symptom_topView} >
                 <Text style={SymptomStyle.symptom_text_title}>Sintomas</Text>
-                <SearchPicker items={sLoaded} defaultValue={symptom.value} setValue={setSymptom} placeHolder={'Seleccione su sintoma'}/>
-                <View style={{width:'80%'}}>{symptom.value==null?
-                <Text style={SymptomStyle.symptom_descriptionText}>Descripcion de sintoma</Text>:<Text style={SymptomStyle.symptom_descriptionText}>{symptom.descripcion}</Text>}</View>
+                {console.log('presintoma =' + preSymptom)}
+                {console.log('value: ' + JSON.stringify(symptom!==null ? symptom.label:'void'))}
+                <SearchPicker value = {symptom===null?null:symptom.label} symptoms={sLoaded} setValue={setSymptom} 
+                    placeHolder={'Describa su sintoma'} 
+                    message={'No se a encontrado ningun sintoma \n con esas caracteristicas'}
+                    open={pickerOpen} setOpen={setPickerOpen}
+                    lock={symptomLock}/>
+                {!pickerOpen &&
+                    <View style={{width:'80%'}}>
+                    {symptom==null ?
+                    <Text style={SymptomStyle.symptom_descriptionText}>Descripcion de sintoma</Text>:<Text style={SymptomStyle.symptom_descriptionText}>{symptom.description}</Text>}
+                    </View>
+                }
             </View>
             <Image resizeMode={'stretch'} style={SymptomStyle.symptom_imgBack}source={require('../../img/register_deco.png')}/>
-            <View style={SymptomStyle.symptom_bottomView}>
+            <View style={pickerOpen ? SymptomStyle.symptom_bottomView_p:SymptomStyle.symptom_bottomView}>
                 <Text style={SymptomStyle.symptom_text_title_bottom}>Grado</Text>
-                {currentGrades.length!=0?
-                <CustomPicker items={currentGrades} defaultValue={grade} setValue={setGrade} placeHolder={'Seleccione un grado'}/>
+                {symptom !== null?
+                <CustomPicker items={symptom.gravity} defaultValue={grade} setValue={setGrade} placeHolder={'Seleccione un grado'}/>
                 : 
                 <Text style={SymptomStyle.no_grade_text}>Seleccione un sintoma</Text>}
                 <View style={{width: '45%' , alignSelf:'center'}}>
-                    <ButtonCustomeOrange title="Agregar" handleFunction={pushSymptoms}></ButtonCustomeOrange>
+                    <ButtonCustomeOrange title= {preSymptom===null?"Agregar":"Editar"} handleFunction={pushSymptoms}></ButtonCustomeOrange>
                 </View>
                 
             </View>
-            {isLoading && 
-            <View style={SymptomStyle.symptom_loading} zIndex={1000000}>
-            <ActivityIndicator animating={true} color={"#FFFFFF"} size='large' />
-            </View>}
         </View>
         
         
     )
 }
+
 
 const SymptomStyle=StyleSheet.create({
 
@@ -180,7 +192,7 @@ const SymptomStyle=StyleSheet.create({
     },
 
     symptom_descriptionText:{
-        marginTop:20,
+        marginTop:5,
         color:'white',
         height:100,
         textAlign:'center'
@@ -199,6 +211,7 @@ const SymptomStyle=StyleSheet.create({
     },
 
     symptom_text_title:{
+        marginBottom:5,
         marginTop: 60,
         fontSize: 25,
         fontWeight: 'bold',
@@ -212,9 +225,20 @@ const SymptomStyle=StyleSheet.create({
     },
 
     symptom_topView:{
+        zIndex:100000,
         backgroundColor: "#B189F8",
         flex:4.5,
         justifyContent:'space-evenly',
+        alignItems:'center',
+        flexDirection:'column',
+        
+    },
+
+    symptom_topView_p:{
+        zIndex:100000,
+        backgroundColor: "#B189F8",
+        flex:10,
+        justifyContent:'flex-start',
         alignItems:'center',
         flexDirection:'column',
         
@@ -229,6 +253,16 @@ const SymptomStyle=StyleSheet.create({
         alignSelf:'center'
     },
 
+    symptom_bottomView_p:{
+        justifyContent:'flex-start',
+        alignContent:'center',
+        backgroundColor: 'white',
+        width: '80%',
+        flex: 4,
+        alignSelf:'center'
+    },
+
+
     symptom_imgBack:{
         width,
         height:60
@@ -239,7 +273,12 @@ const mapStateToProps = (state) => {
     return {
         idR: state.user_data.id,
         cancer: state.user_data.cancer,
+        symptoms:state.symptom_data.symptoms
     }
 }
 
-export default connect(mapStateToProps)(SymptomRegister)
+const mapDispatchToProps = {
+    setSymptomRedux
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(SymptomRegister)

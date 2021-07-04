@@ -1,6 +1,6 @@
 import React from 'react'
 import { TouchableOpacity,Text,StyleSheet,Pressable } from "react-native";
-import {colors} from '../values/colors'
+import {Colors} from '../styles/Colors'
 
 export const ButtonExtra = ({handleFunction}) =>{
     return(
@@ -12,7 +12,7 @@ export const ButtonExtra = ({handleFunction}) =>{
 
 const BEOStyle = StyleSheet.create({
     background:{
-        backgroundColor:colors.violet,
+        backgroundColor:Colors.violet,
         width:80,
         borderRadius: 40,
         padding: 10,

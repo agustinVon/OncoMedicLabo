@@ -1,14 +1,21 @@
 import React, {useState,useEffect} from 'react'
 import {ToastAndroid,Platform, AlertIOS,
-        SafeAreaView,StyleSheet,Dimensions,View,Image,Text,TextInput,ScrollView, Button,Modal,Pressable, KeyboardAvoidingView} from 'react-native'
+        SafeAreaView,StyleSheet,Dimensions,View,Image,Text,TextInput,ScrollView, Button,Modal,Pressable, KeyboardAvoidingView, Alert } from 'react-native'
 import {Picker} from '@react-native-picker/picker'
 import {ButtonCustomeOrange} from '../Buttons/ButtonCustomeOrange.js'
 import {connect} from 'react-redux'
-import {setPersonalInformationAction} from '../../reduxStore/actions/registerAction'
+import {logoutUser, setDbtInformationAction, setPersonalInformationAction} from '../../reduxStore/actions/registerAction'
 import DropDownPicker from 'react-native-dropdown-picker'
+import {useFocusEffect} from '@react-navigation/native'
 
 import {CustomPicker} from '../commonComponents/Pickers/CommonPicker'
 import {DatePickerModal} from '../commonComponents/Modals/DatePickerModal'
+import {CustomAlert} from '../commonComponents/Alerts/Alert'
+import {PasswordField} from '../commonComponents/Fields/PasswordField'
+import {IncorrectField} from '../commonComponents/Fields/IncorrectField'
+import {MailField} from '../commonComponents/Fields/MailField'
+import Icon from 'react-native-vector-icons/AntDesign';
+import {hashPassword} from '../PasswordHash'
 
 
 const {width} = Dimensions.get("window")
@@ -19,23 +26,33 @@ const Register = ({navigation,setPersonalInformationAction}) => {
     const [name,setName] = useState ("")
     const [surname,setSurname] = useState("")
     const [password,setPassword] = useState("")
-    const [gender,setGender] = useState(null)
+    const [gender,setGender] = useState(0)
     const [birth, setBirth] = useState(new Date())
-    const [lenghtbirth,setLength] = useState(0)
     const [birthWasSelected, setBirthSelected] = useState(false)
     const [emailValidate,setEValidate] = useState(true)
     const [dateModalVisible, setDModal] = useState(false)
+    const [firstTry,setFirstTry] = useState(true)
 
     useEffect(() => {
         const email_aux = email;
         email_aux.length > 0 ? email_aux.includes("@") ? setEValidate(true) : setEValidate(false) : setEValidate(true)
     }, [email])
+
+    
     
 
+    const handleSwitchToRegisterMedic = async () =>{
+        setFirstTry(false)
+        if(name==='' || surname ==='' || password ===''|| email===''){
+            CustomAlert('Error','Complete todos los campos')
+        }
+        else{
+            hashPassword(password, pushToRedux)
+        }
+    }
 
-    const handleSwitchToRegisterMedic = () =>{
-       // email.length > 0 ? name.length >0 && gender != 0 && birth >0 && navigation.navigate("register_medic") : notifyMessage("Faltan datos")
-        setPersonalInformationAction({name:name,surname:surname,email:email,gender:gender,birth:birth.toDateString(),password:password})
+    const pushToRedux = (hashedPassword) => {
+        setPersonalInformationAction({name:name,surname:surname,email:email,gender:gender,birth:birth.toDateString(),password:hashedPassword})
         navigation.navigate("register_medic")
     }
 
@@ -48,6 +65,7 @@ const Register = ({navigation,setPersonalInformationAction}) => {
                 {label: 'Otro', value:2}]
 
     return (
+        
         <SafeAreaView style={RegisterUser.reguse_cont_background}>
             <View style={RegisterUser.reguse_top}>
                 <Image source={require("../../img/ic_user.png")}/>
@@ -65,38 +83,46 @@ const Register = ({navigation,setPersonalInformationAction}) => {
                     <View style={RegisterUser.reguse_cont_regusein_inputs}>
                             <View>
                                 <Text style={RegisterUser.reguse_text_upinput}>Nombre</Text>
-                                <TextInput onChangeText={setName} placeholderTextColor="#c4c4c4" placeholder="Ingrese su nombre" style={RegisterUser.reguse_textInput}></TextInput>
+                                <IncorrectField fail={name.length < 1 && !firstTry}
+                                    value={name} setValue={setName}
+                                    placeHolder={'Ingrese su nombre'} message={'Campo incompleto'}/>
                             </View>
                             <View style={{marginTop:25}}>
                                 <Text style={RegisterUser.reguse_text_upinput}>Apellido</Text>
-                                <TextInput onChangeText={setSurname} placeholderTextColor="#c4c4c4" placeholder="Ingrese su Apellido" style={RegisterUser.reguse_textInput}></TextInput>
+                                <IncorrectField fail={surname.length < 1 && !firstTry}
+                                    value={surname} setValue={setSurname}
+                                    placeHolder={'Ingrese su Apellido'} message={'Campo incompleto'}/>
                             </View>
                             <View style={{marginTop:25}}>
                                 <Text style={RegisterUser.reguse_text_upinput}>Contraseña</Text>
-                                <TextInput onChangeText={setPassword} placeholderTextColor="#c4c4c4" placeholder="Ingrese su contraseña" style={RegisterUser.reguse_textInput}></TextInput>
+                                <PasswordField setValue={setPassword} failToggle={true}/>
                             </View>
+                            
                             <View style={{marginTop: 25, zIndex:40}}>
                                 <View>
-                                    <Text style={RegisterUser.reguse_text_upinput}>Genero</Text>
-                                    <View>
-                                        <CustomPicker items={genderTypes} defaultValue={gender} setValue={setGender} placeHolder={'Seleccione su genero'}/>
+                                    <Text style={RegisterUser.reguse_text_upinput}>Sexo</Text>
+                                    <View style={{marginTop:8}}>
+                                        <CustomPicker items={genderTypes} defaultValue={gender} setValue={setGender} placeHolder={'Seleccione su sexo'}/>
                                     </View>
                                 </View>
                                 
                             </View>
                             <View style={{marginTop: 25}}>
                                 <Text style={RegisterUser.reguse_text_upinput}>Email</Text>
-                                <TextInput onChangeText={setEmail} value={email} keyboardType={"email-address"} placeholderTextColor="#c4c4c4" placeholder="Ingrese su email" style={ emailValidate ? RegisterUser.reguse_textInput : RegisterUser.reguse_textInputRed }></TextInput>
-                                {
-                                    !emailValidate  && <Text style={RegisterUser.reguse_validvalue}>Introducir valor valido</Text>
-                                }
+                                <MailField setValue={setEmail} incomplete={!firstTry && email.length <1}/>
                             </View>
                             <View style={{marginTop: 25}}>
                                 <Text style={RegisterUser.reguse_text_upinput}>Fecha de Nacimiento</Text>
                                 <Pressable style={RegisterUser.reguse_date_picker_container} onPress={()=>(setDModal(true),setBirthSelected(true))}>
-                                    {!birthWasSelected?
+                                    {console.log('fecha: '+birth)}
+                                    {console.log('fue seleccionada la fecha: '+birthWasSelected)}
+                                    {birthWasSelected?
+                                    <View>
+                                        <Text style={RegisterUser.reguse_text}> {''+birth.getDate()+' / '+(birth.getMonth()+1)+' / '+birth.getFullYear()} </Text>
+                                    </View>
+                                    :
                                     <Text style={RegisterUser.reguse_text_upinput}>Seleccione su fecha de nacimiento</Text>
-                                    :<Text style={RegisterUser.reguse_text}>{''+birth.getDate()+' / '+birth.getMonth()+' / '+birth.getFullYear()}</Text>}    
+                                    }    
                                 </Pressable>
                             </View>
                             <ButtonCustomeOrange title={"Continuar"} handleFunction={handleSwitchToRegisterMedic} marginT={{marginTop: 50}}/>
@@ -110,7 +136,8 @@ const Register = ({navigation,setPersonalInformationAction}) => {
     )
 }
 const mapDispatchToProps = {
-    setPersonalInformationAction
+    setPersonalInformationAction,
+    logoutUser
 }
 
 export default connect(null,mapDispatchToProps)(Register)
@@ -124,6 +151,30 @@ const RegisterUser = StyleSheet.create({
         borderBottomLeftRadius:10, 
         borderBottomRightRadius:10,
         height:50,
+    },
+    log_text_container:{
+        justifyContent:'center',
+        alignItems:'center',
+        flexDirection:'row',
+        marginTop: 6,
+        paddingLeft:10,
+        paddingRight:10,
+        width:300,
+        height:50,
+        borderRadius: 10,
+        backgroundColor: "#E3E3E3",
+    },
+    log_textInput:{
+
+        flex:5,
+        height:50,
+        width:20,
+        fontSize: 17,
+        borderRadius: 10,
+    },
+    log_icon_style:{
+        backgroundColor:'#E3E3E3',
+        flex:1,
     },
     reguse_validvalue:{
         color:"red"
@@ -142,6 +193,7 @@ const RegisterUser = StyleSheet.create({
     reguse_text_upinput:{
         color:"#AAAAAA",
         fontSize: 17,
+        marginLeft:10
     },
     reguse_textInput:{
         marginTop: 6,
@@ -154,15 +206,15 @@ const RegisterUser = StyleSheet.create({
     },
     reguse_date_picker_container:{
         marginTop: 6,
-        width:300,
+        width:320,
         height:50,
         padding: 10,
         borderRadius: 10,
-        backgroundColor: "#E3E3E3",
-        justifyContent:'center'   
+        backgroundColor: "#E3E3E3",  
     },
     reguse_text:{
         fontSize: 17,
+        zIndex: 10000,
     },
     reguse_textInputRed:{
         marginTop: 6,
@@ -176,6 +228,8 @@ const RegisterUser = StyleSheet.create({
         backgroundColor: "#E3E3E3",   
     },
     reguse_cont_regusein_inputs:{
+        alignContent:'center',
+        alignItems:'center',
         flexDirection: 'column',
         width:300,
         alignSelf: 'center',

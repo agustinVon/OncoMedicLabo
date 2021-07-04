@@ -9,6 +9,7 @@ import messaging from '@react-native-firebase/messaging';
 import { firebase } from '@react-native-firebase/firestore';
 import { Platform } from 'react-native';
 
+
 messaging().setBackgroundMessageHandler(async remoteMessage => {
     console.log('Message handled in the background!', remoteMessage);
 });

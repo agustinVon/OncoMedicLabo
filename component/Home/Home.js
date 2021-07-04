@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Pressable } from 'react-native'
 import { SafeAreaView,View,Text,StyleSheet,Dimensions,Image,Button } from 'react-native'
+import {useFocusEffect} from '@react-navigation/native'
 import {ButtonCustomeHome} from '../Buttons/ButtonCustomeHome.js'
 import { connect } from 'react-redux'
 import {AvatarImage} from '../AvatarImage'
-import {ButtonCalendarHome} from '../Buttons/ButtonCalendarHome'
-import { ScrollView } from 'react-native'
-import { ButtonCustomeOrange } from '../Buttons/ButtonCustomeOrange.js'
 import {ButtonExtra} from '../Buttons/ButtonExtra'
-
+import {ButtonCalendarHome} from '../Buttons/ButtonCalendarHome'
 
 const {width} = Dimensions.get('window')
 
@@ -16,11 +14,9 @@ const Home = ({navigation, avatarData, name}) => {
 
     const [avatar,setAvatar] = useState(avatarData)
     const [morOpt,setMorOpt]=useState(false)
-    console.log(avatar)
 
     useEffect(()=>{
         setAvatar(avatarData)
-        console.log(avatar)
     },[avatarData])
 
     const switchDailyRegister = () =>{
@@ -28,7 +24,7 @@ const Home = ({navigation, avatarData, name}) => {
     }
 
     const switchSymptomsRegister = () =>{
-        navigation.navigate('registro_sintoma')
+        navigation.navigate('registro_sintoma',{preSymptom:null,preGrade:null})
     }
 
     const switchAvatarChanger = () => {
@@ -105,17 +101,18 @@ const HomeStyle = StyleSheet.create({
     },
     h_txt_hola:{
         marginTop:20,
-        marginLeft: 20,
+        marginLeft: 15,
         fontSize: 25, 
     },
     h_txt_name:{
         fontSize:25,
         fontWeight: 'bold',
-        marginLeft: 20,
+        marginLeft: 15,
     },
     h_header_img:{
         width:50,
-        height:50
+        height:50,
+        marginLeft:10
     },
     h_header:{
         justifyContent: 'center',
@@ -160,5 +157,6 @@ const mapStateToProps = (state) => {
         name: state.user_data.name
     }
 }
+
 
 export default connect(mapStateToProps)(Home)
