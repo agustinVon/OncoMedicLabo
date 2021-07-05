@@ -48,6 +48,7 @@ import { FailStatus } from './component/StatusActions/FailStatus';
 import { WaitingForApproval } from './component/StatusActions/WaitingForApproval';
 import {routes} from './component/values/routes'
 import CalendarView from './component/Calendar/CalendarView'
+import Profile from './component/ProfileEdit/Profile'
 
 
 const Stack = createStackNavigator()
@@ -73,6 +74,7 @@ const App: () => Node = () => {
           <Stack.Screen  name='status' component={SucessStatus} options={{header: ()=> null}}/>
           <Stack.Screen  name='fail' component={FailStatus} options={{header: ()=> null}}/>
           <Stack.Screen  name='calendar' component={CalendarView} options={{header: ()=> null}}/>
+          <Stack.Screen  name='profile' component={Profile} options={{header: ()=> null}}/>
         </Stack.Navigator>
       </Provider>
 

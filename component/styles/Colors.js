@@ -4,5 +4,6 @@ export const Colors = {
     inputFieldGrey: '#E3E3E3',
     black:'#AAAAAA',
     violet:'#B189F8',
-    grey: '#F7F3FF'
+    grey: '#F7F3FF',
+    white:'#FFFFFF'
 }

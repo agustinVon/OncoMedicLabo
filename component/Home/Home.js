@@ -28,7 +28,7 @@ const Home = ({navigation, avatarData, name}) => {
     }
 
     const switchAvatarChanger = () => {
-        navigation.navigate('avatar_changer')
+        navigation.navigate('profile')
     }
 
     const switchCalendar = () => {
@@ -79,7 +79,7 @@ const Home = ({navigation, avatarData, name}) => {
 }
 const HomeStyle = StyleSheet.create({
     h_scroll_buttons:{
-        marginTop:'5%',
+        marginTop:'6%',
         height:'60%',
         width:'100%',
         alignContent:'center',

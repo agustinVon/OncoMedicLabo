@@ -3,7 +3,7 @@ import {View,Modal,Text} from 'react-native'
 import {ButtonCustomeOrange} from '../../Buttons/ButtonCustomeOrange'
 import {GeneralStyle} from '../../styles/GeneralStyle'
 import {Colors} from '../../styles/Colors'
-import {ButtonCustomeViolet} from '../../Buttons/ButtinCustomViolet'
+import {ButtonCustomeViolet} from '../../Buttons/ButtonCustomViolet'
 
 export const DisclaimerModal = ({visibility,setVisibility,contFunction}) =>{
     return(

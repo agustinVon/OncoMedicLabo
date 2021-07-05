@@ -27,7 +27,7 @@ const BCalHome = StyleSheet.create({
         justifyContent: 'space-around',
         alignItems: 'center',
         flexDirection:'row',
-        marginTop:20
+        marginTop:35
     },
     title:{
         width:180,
