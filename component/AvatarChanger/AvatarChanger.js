@@ -40,7 +40,7 @@ const AvatarChanger = ({navigation,avatarData,id,setAvatarAction}) => {
     },[avatar])
 
     const returnPress = () =>{
-        navigation.navigate("home")
+        navigation.navigate("profile")
     }
 
     return (

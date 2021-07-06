@@ -2,7 +2,7 @@ import React,{useState, useEffect} from 'react'
 import {View,Text,TextInput, Keyboard} from 'react-native'
 import {GeneralStyle} from '../../styles/GeneralStyle'
 
-export const IncorrectField = ({fail,setValue,value,placeHolder,keyboardType,message,ifOnFocus=null, lock = false}) => {
+export const IncorrectField = ({fail,setValue,value,placeHolder,keyboardType,message,ifOnFocus=null, lock = false, width=320}) => {
 
     const [text,setText] = useState(value)
 
@@ -22,7 +22,7 @@ export const IncorrectField = ({fail,setValue,value,placeHolder,keyboardType,mes
     return(
         <View>
             {console.log('value inside =' + text)}
-            <View style={!fail ? GeneralStyle.field_multiple : GeneralStyle.field_incorrect}>
+            <View style={!fail ? {...GeneralStyle.field_multiple,width:width} : {...GeneralStyle.field_incorrect,width:width}}>
                 <TextInput onChangeText={setText} 
                     onSubmitEditing={Keyboard.dismiss}
                     value={text}

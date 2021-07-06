@@ -1,15 +1,46 @@
-import React from 'react'
+import React,{useState,useEffect} from 'react'
 import {View,StyleSheet,ScrollView,Pressable,Text,Image} from 'react-native'
 import {Colors} from '../styles/Colors'
 import Icon from 'react-native-vector-icons/AntDesign';
 import {AvatarImage} from '../AvatarImage'
 import {ButtonEditProfile} from '../Buttons/ButtonEditProfile'
 import {GeneralStyle} from '../styles/GeneralStyle'
+import { connect } from 'react-redux';
+import {SmokeEditModal} from '../commonComponents/Modals/SmokeEditModal'
 
 const Profile = ({navigation,userData}) => {
 
+    const [smokeP,setSmokeP] = useState('')
+    const [modal,setModal] = useState(false)
+
+
+    useEffect(()=>{
+        if(userData.smoke.smoke == 0){
+            setSmokeP('No Fumo')
+        }
+        else if(userData.smoke.smoke == 1){
+            setSmokeP('Si fumo')
+        }
+        else{
+            setSmokeP(`Fume ${userData.smoke.time} años`)
+        }
+    },[smokeP])
+
+    const smokeEdit = ()=>{
+        setModal(true)
+    }
+    
+    const setSmokeData = (data) =>{
+        console.log('smoke: '+ JSON.stringify(data))
+        console.log('modal ' + modal)
+    }
+
     const onEdit = ()=>{
         navigation.navigate('avatar_changer')
+    }
+
+    const returnPress = () =>{
+        navigation.navigate('home')
     }
 
     return (
@@ -19,28 +50,29 @@ const Profile = ({navigation,userData}) => {
                     <Icon name={'arrowleft'} color={Colors.orange} size={30}/>
                 </Pressable>
             </View>
+            <SmokeEditModal visibility={modal} setVisibility={setModal} setSmokeData={setSmokeData}/>
             <ScrollView contentContainerStyle={ProfileStyle.viewContainer}>
                 <View style={ProfileStyle.viewImgContainer}>
-                    <AvatarImage size={'big'} index={1}/>
+                    <AvatarImage size={'big'} index={userData.avatar}/>
                     <ButtonEditProfile onPress={()=>onEdit()} color={Colors.white} backgroundColor={Colors.orange}/>
                 </View>
-                <Text style={GeneralStyle.text_profile_name}>Jorge Carlos</Text>
+                <Text style={GeneralStyle.text_profile_name}>{userData.name + ' ' +userData.surname}</Text>
                 <View style={ProfileStyle.viewGeneralData}>
                     <View style={ProfileStyle.viewDataRow}>
                         <Text style={GeneralStyle.text_profile}>ID:</Text>
-                        <Text style={GeneralStyle.text_profile_data}>12345678</Text>
+                        <Text style={GeneralStyle.text_profile_data}>{userData.id}</Text>
                     </View>
                     <View style={ProfileStyle.viewDataRow}>
                         <Text style={GeneralStyle.text_profile}>Medico:</Text>
-                        <Text style={GeneralStyle.text_profile_data}>Miguel Manglio</Text>
+                        <Text style={GeneralStyle.text_profile_data}>{userData.medic}</Text>
                     </View>
                     <View style={ProfileStyle.viewDataRow}>
                         <Text style={GeneralStyle.text_profile}>Lugar:</Text>
-                        <Text style={GeneralStyle.text_profile_data}>Hospital Austral</Text>
+                        <Text style={GeneralStyle.text_profile_data}>{userData.place}</Text>
                     </View>
                     <View style={ProfileStyle.viewDataRow}>
                         <Text style={GeneralStyle.text_profile}>Cancer:</Text>
-                        <Text style={GeneralStyle.text_profile_data}>Colon</Text>
+                        <Text style={GeneralStyle.text_profile_data}>{userData.cancer}</Text>
                     </View>
                     <View style={ProfileStyle.viewDataRow}>
                         <Text style={GeneralStyle.text_profile}>Droga:</Text>
@@ -51,9 +83,9 @@ const Profile = ({navigation,userData}) => {
                     <Image source={require('../../img/ic_smoke.png')} style={ProfileStyle.image}/>
                     <View style={ProfileStyle.viewExtraDataDetails}>
                         <Text style={GeneralStyle.text_profile_extra_data}>Tabaquismo :</Text>
-                        <Text style={GeneralStyle.text_profile_extra}>Fume por 5 años</Text>
+                        <Text style={GeneralStyle.text_profile_extra}>{smokeP}</Text>
                     </View>
-                    <ButtonEditProfile onPress={()=>onEdit()} color={Colors.violet} backgroundColor={Colors.white}/>
+                    <ButtonEditProfile onPress={()=>smokeEdit()} color={Colors.violet} backgroundColor={Colors.white}/>
                 </View>
                 <View style={ProfileStyle.viewExtraDataNoEdit}>
                     <Image source={require('../../img/ic_diabetic.png')} style={ProfileStyle.image}/>
@@ -187,6 +219,16 @@ const ProfileStyle = StyleSheet.create({
     
 })
 
-export default (Profile)
+const mapStateToProps = (state) => {
+    return {
+        userData: state.user_data
+    }
+}
+
+const mapDispatchToProps = {
+    
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(Profile)
 
 

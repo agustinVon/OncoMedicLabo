@@ -239,6 +239,25 @@ export const GeneralStyle = StyleSheet.create({
         shadowRadius:40
     },
 
+    modal_smoke_background:{
+        backgroundColor:Colors.white,
+        borderColor:Colors.violet,
+        borderWidth:2,
+        height:400,
+        width:'80%',
+        justifyContent:'center',
+        alignContent:'center',
+        alignItems:'center',
+        borderRadius:15,
+        shadowOffset: {
+            width: 0,
+            height: 0,
+        },
+        shadowColor:'#000000',
+        shadowOpacity:0.5,
+        shadowRadius:40
+    },
+
     modal_title:{
         fontSize:FontSizes.modalTitle,
         color:Colors.violet,

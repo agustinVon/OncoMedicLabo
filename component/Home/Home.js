@@ -10,7 +10,7 @@ import {ButtonCalendarHome} from '../Buttons/ButtonCalendarHome'
 
 const {width} = Dimensions.get('window')
 
-const Home = ({navigation, avatarData, name}) => {
+const Home = ({navigation, avatarData, name,user_data}) => {
 
     const [avatar,setAvatar] = useState(avatarData)
     const [morOpt,setMorOpt]=useState(false)
@@ -37,6 +37,7 @@ const Home = ({navigation, avatarData, name}) => {
 
     return (
         <SafeAreaView style={HomeStyle.h_const_background}>
+            {console.log(user_data)}
             <View style={HomeStyle.h_back_img}>
                 <View  style={HomeStyle.h_back_img}>
                     <Image style={HomeStyle.h_img}source={require('../../img/back_home1.png')}/>
@@ -154,7 +155,8 @@ const HomeStyle = StyleSheet.create({
 const mapStateToProps = (state) => {
     return {
         avatarData: state.user_data.avatar,
-        name: state.user_data.name
+        name: state.user_data.name,
+        user_data:state.user_data
     }
 }
 

@@ -68,19 +68,19 @@ const user_data = (state=default_user , action) =>{
                 etnia: action.payload.etnia,
                 id: action.payload.id,
                 smoke:{
-                    smoke: action.payload,
-                    time: action.payload.time,
-                    qnt: action.payload.qnt,
+                    smoke: action.payload.smoke.smoke,
+                    time: action.payload.smoke.time,
+                    qnt: action.payload.smoke.qnt,
                 },
                 dbt:{
-                    dbt: action.payload,
-                    med: action.payload
+                    dbt: action.payload.dbt.dbt,
+                    med: action.payload.dbt.med
                 },
                 med:{
-                    hip: action.payload.hip,
-                    epoc: action.payload.epoc,
-                    acv: action.payload.acv,
-                    inf: action.payload.inf,
+                    hip: action.payload.med.hip,
+                    epoc: action.payload.med.epoc,
+                    acv: action.payload.med.acv,
+                    inf: action.payload.med.inf,
                 },
                 avatar:action.payload.avatar,
                 cancer:action.payload.cancer
