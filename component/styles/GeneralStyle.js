@@ -250,5 +250,33 @@ export const GeneralStyle = StyleSheet.create({
         marginRight:10,
         fontSize:FontSizes.registerQuerys,
         textAlign:'center'
+    },
+
+    text_profile:{
+        fontSize:FontSizes.modalTitle,
+        color:Colors.textGrey,
+    },
+
+    text_profile_data:{
+        fontSize:FontSizes.modalTitle,
+        color:Colors.black,
+    },
+
+    text_profile_name:{
+        fontSize:FontSizes.titles,
+        color:Colors.textBlack,
+        fontWeight:'bold'
+    },
+
+    text_profile_extra:{
+        fontSize:FontSizes.modalTitle,
+        color:Colors.white,
+        fontWeight:'bold'
+    },
+
+    text_profile_extra_data:{
+        fontSize:FontSizes.modalTitle,
+        color:Colors.white,
     }
+
 });
