@@ -5,6 +5,7 @@ export const Colors = {
     black:'#AAAAAA',
     textBlack:'#262626',
     violet:'#B189F8',
+    lightViolet:'#CCB2FC',
     grey: '#F7F3FF',
     white:'#FFFFFF'
 }

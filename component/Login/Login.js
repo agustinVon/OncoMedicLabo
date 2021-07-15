@@ -1,5 +1,5 @@
 import React,{useEffect, useState} from 'react'
-import {SafeAreaView,Image,StyleSheet,Dimensions,View,Text,TextInput,Pressable,Modal,Button } from 'react-native'
+import {SafeAreaView,Image,StyleSheet,Dimensions,View,Text,TextInput,Pressable,Modal,Button, Linking } from 'react-native'
 import {ButtonCustomeOrange} from '../Buttons/ButtonCustomeOrange.js'
 import firestore from '@react-native-firebase/firestore';
 import {setUser, logoutUser} from '../../reduxStore/actions/registerAction'
@@ -20,10 +20,17 @@ const {height} = Dimensions.get("window")
 
 const Login = ({navigation, setUser, logoutUser}) => {
     const [modalVisible, setModalVisible] = useState(false);
+    const [modalchangeContra, setModalchangeContra] = useState(false);
+    const [id,setId]=useState("")
     const [email,setEmail]=useState("")
     const [password,setPassword] = useState("")
     const [firstTry, setFirstTry] = useState(true)
     const [isLoading,setIsLoading] = useState(false)
+    const [incorrect,setIncorrect] = useState('')
+    const [correct,setCorrect] = useState(false)
+    const [incorrectid,setincorrectid] = useState(false)
+    const [code,setCode] = useState(false)
+    const [newPass,setNewPass] = useState('')
 
     useFocusEffect(
         React.useCallback(()=>{
@@ -41,6 +48,31 @@ const Login = ({navigation, setUser, logoutUser}) => {
         if(email !== '' || password !== ''){
             hashPassword(password,login)
         }
+    }
+
+    const sendIt =()=>{
+        Linking.openURL('https://161746c7.sibforms.com/serve/MUIEAFpS0VRg9Krk2dGLiXezjk6g2LMpJ-ust5q8aVfz_Torvu_F6Ux57BuISYuT2TYuwyg2dbE51a0cAkJNcBoyKKXiqqe6OpbZurN-GpbM3PyggeVRn7WmW0W1kbvoU7VPAbrSijMYouZMO8KTO_48xGy6yEmVU1xBNwKgDXNadrL25QBGkVUqXHR_ED7EPxLmLsTNkLqj18P-')
+        setModalVisible(true)
+    }
+
+    const changeContra = () => {
+        if (code!=="121AWFSDK"){
+            setIncorrect('Codigo incorrecto')
+        } else {
+            setCorrect(true)
+            setModalVisible(false)
+            setModalchangeContra(true)
+        }
+    }
+
+    const changeThePassword = async () => {
+        const db = await firestore()
+         db.collection("testUsers").doc(id).update({
+            'password': newPass
+         }).catch(()=>{
+             setincorrectid(true)
+         })
+         setModalchangeContra(false)
     }
 
     const login = async (hashedPassword) =>{
@@ -84,16 +116,41 @@ const Login = ({navigation, setUser, logoutUser}) => {
             >
                 <View style={styles.centeredView}>
                 <View style={styles.modalView}>
-                    <Text style={styles.modalText}>Proximamente va a funcionar</Text>
+                    <Text style={{color: 'red'}}>{incorrect}</Text>
+                    <TextInput style={{color: 'black'}} onChangeText={setCode} placeholderTextColor="black" placeholder="Ingrese el codigo"></TextInput>
                     <Pressable
                     style={[styles.button, styles.buttonClose]}
-                    onPress={() => setModalVisible(!modalVisible)}
+                    onPress={changeContra}
                     >
-                    <Text style={styles.textStyle}>Genial!</Text>
+                    <Text onPress={changeContra} style={styles.textStyle}>Aceptar</Text>
                     </Pressable>
                 </View>
                 </View>
             </Modal>
+
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalchangeContra}
+                onRequestClose={() => {
+                Alert.alert("Modal has been closed.");
+                setModalchangeContra(!modalchangeContra);
+                }}
+            >
+                <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                    <Text  style={{color: 'red'}} >{incorrectid && "Id incorrecto"}</Text>
+                    <TextInput style={{color: 'black'}} onChangeText={setId} placeholderTextColor="black" placeholder="Ingrese su id"></TextInput>
+                    <TextInput style={{color: 'black'}} onChangeText={setNewPass} placeholderTextColor="black" placeholder="Ingrese su nueva contraseña"></TextInput>
+                    <Pressable
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={changeThePassword}
+                    >
+                    <Text onPress={changeThePassword} style={styles.textStyle}>Aceptar</Text>
+                    </Pressable>
+                </View>
+                </View>
+            </Modal>    
             
             <View style={height<700?LoginStyle.log_top_color2:LoginStyle.log_top_color}/>
             <Image resizeMode={height<700 ?"stretch":"cover"} style={height<700?LoginStyle.log_img_deco2:LoginStyle.log_img_deco1} source={require('../../img/loging_deco.png')}/>

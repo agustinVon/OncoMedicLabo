@@ -5,11 +5,13 @@ import {GeneralStyle} from '../../styles/GeneralStyle'
 import {Colors} from '../../styles/Colors'
 import RadioForm from 'react-native-simple-radio-button';
 import { IncorrectField } from '../Fields/IncorrectField'
+import { set } from 'react-native-reanimated'
 
 export const SmokeEditModal = ({visibility,setVisibility,setSmokeData}) =>{
 
     const [smokeChoice, setSmokeChoice] = useState(1)
-    const [smokeIncorrect, setSmokeErr] = useState(false)
+    const [smokeIncorrectQnt, setSmokeErrQ] = useState(false)
+    const [smokeIncorrectTime, setSmokeErrT] = useState(false)
     const [firstTime,setFirstTime] = useState(true)
     const [time, setTime] = useState(0)
     const [qnt, setQnt] = useState(0)
@@ -18,33 +20,53 @@ export const SmokeEditModal = ({visibility,setVisibility,setSmokeData}) =>{
     {label: 'Deje de fumar', value: 2 }]
 
     useEffect(()=>{
-        if((time <= 0 || qnt <= 0) && !firstTime){
-            setSmokeErr(true)
+        if(time <= 0){
+            setSmokeErrT(true)
         }
         else{
-            setSmokeErr(false)
-            setFirstTime(false)
+            setSmokeErrT(false)
         }
-    },[time,qnt])
+    },[time])
+
+    useEffect(()=>{
+        if(qnt <= 0){
+            setSmokeErrQ(true)
+        }
+        else{
+            setSmokeErrQ(false)
+        }
+    },[qnt])
 
     const confirm = () => {
-        if(setSmokeChoice === 1){
-            console.log('hola')
-            setVisibility(false)
-            setSmokeData({
-                smoke: smokeChoice,
-                qnt: 0,
-                time: 0
-            })
-        }
-        else{
-            if(!firstTime && !smokeIncorrect){
+        console.log('choice: ' + smokeIncorrectQnt)
+        setFirstTime(false)
+        if(smokeChoice === 1){
+            if(!smokeIncorrectQnt){
+                console.log('hola')
                 setVisibility(false)
                 setSmokeData({
                     smoke: smokeChoice,
-                    qnt: qnt,
-                    time: time
+                    qnt: parseInt(qnt),
+                    time: 0
                 })
+                setTime(0)
+                setQnt(0)
+                setSmokeChoice(1)
+                setFirstTime(true)
+            }
+        }
+        else if(smokeChoice === 2){
+            if(!smokeIncorrectTime && !smokeIncorrectQnt){
+                setVisibility(false)
+                setSmokeData({
+                    smoke: smokeChoice,
+                    qnt: parseInt(qnt),
+                    time: parseInt(time)
+                })
+                setTime(0)
+                setQnt(0)
+                setSmokeChoice(1)
+                setFirstTime(true)
             }
         }
         
@@ -74,21 +96,20 @@ export const SmokeEditModal = ({visibility,setVisibility,setSmokeData}) =>{
                     animation={true}
                     onPress={(value) => {setSmokeChoice(value)}}
                     />
-                    { smokeChoice === 2 &&
                     <View style={{marginTop:20}}>
-                        <IncorrectField fail={smokeIncorrect} value={time} setValue={setTime} 
-                        placeHolder={'Cuantos años fumaste?'}
-                        keyboardType={'numeric'}
-                        message={'Valores invalidos'}
-                        width={280}/>
-                        <View style={{marginTop:15}}>
-                            <IncorrectField fail={smokeIncorrect} value={qnt} setValue={setQnt} 
+                            <IncorrectField fail={(smokeIncorrectQnt && !firstTime)} value={qnt} setValue={setQnt} 
                             placeHolder={'Cuantos atados al dia?'}
                             keyboardType={'numeric'}
                             message={'Valores invalidos'}
                             width={280}/>
                         </View>
-                        
+                    { smokeChoice === 2 &&
+                    <View style={{marginTop:15}}>
+                        <IncorrectField fail={(smokeIncorrectTime && !firstTime)} value={time} setValue={setTime} 
+                        placeHolder={'Cuantos años fumaste?'}
+                        keyboardType={'numeric'}
+                        message={'Valores invalidos'}
+                        width={280}/>
                     </View>
                     }
                     <View style={{width:'50%'}}>

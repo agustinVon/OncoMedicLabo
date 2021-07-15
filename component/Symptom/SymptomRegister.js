@@ -44,6 +44,7 @@ const SymptomRegister = ({navigation,idR,symptoms,cancer,setSymptomRedux,route})
                 })
             }
         )
+        console.log(sL)
         setSLoaded(sL)
     }
 
@@ -68,8 +69,10 @@ const SymptomRegister = ({navigation,idR,symptoms,cancer,setSymptomRedux,route})
     )
 
     useEffect(() => {
+        console.log('loaded: ' + symptomIsLoaded)
         if(symptomIsLoaded===false){
             getSymptoms().then(
+                console.log(sLoaded),
                 setSymptomIsLoaded(!symptomIsLoaded)
             )
         }

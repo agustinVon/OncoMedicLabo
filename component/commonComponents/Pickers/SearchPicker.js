@@ -23,6 +23,7 @@ export const SearchPicker = ({symptoms,value, setValue, placeHolder, message , o
                 const lowerSearch = searchText.toLocaleLowerCase()
                 const auxListOfSymptoms = []
                 symptoms.forEach((symptom)=>{
+                    console.log(symptom)
                     const label = symptom.label.toLowerCase()
                     const desc = symptom.description.toLowerCase()
                     if(label.includes(lowerSearch) || desc.includes(lowerSearch)){

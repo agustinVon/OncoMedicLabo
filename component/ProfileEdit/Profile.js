@@ -7,11 +7,14 @@ import {ButtonEditProfile} from '../Buttons/ButtonEditProfile'
 import {GeneralStyle} from '../styles/GeneralStyle'
 import { connect } from 'react-redux';
 import {SmokeEditModal} from '../commonComponents/Modals/SmokeEditModal'
+import {setSmokeInformationAction, setSmokeOptionAction} from '../../reduxStore/actions/registerAction'
+import firestore from '@react-native-firebase/firestore';
 
-const Profile = ({navigation,userData}) => {
+const Profile = ({navigation,userData,setSmokeInformationAction, setSmokeOptionAction}) => {
 
     const [smokeP,setSmokeP] = useState('')
     const [modal,setModal] = useState(false)
+    const [loading, setLoading] = useState(false)
 
 
     useEffect(()=>{
@@ -24,7 +27,7 @@ const Profile = ({navigation,userData}) => {
         else{
             setSmokeP(`Fume ${userData.smoke.time} años`)
         }
-    },[smokeP])
+    },[userData])
 
     const smokeEdit = ()=>{
         setModal(true)
@@ -33,6 +36,8 @@ const Profile = ({navigation,userData}) => {
     const setSmokeData = (data) =>{
         console.log('smoke: '+ JSON.stringify(data))
         console.log('modal ' + modal)
+        setSmokeInformationAction(data.smoke)
+        setSmokeOptionAction({qnt:data.qnt,time:data.time})
     }
 
     const onEdit = ()=>{
@@ -40,11 +45,26 @@ const Profile = ({navigation,userData}) => {
     }
 
     const returnPress = () =>{
+        storeModifications()
         navigation.navigate('home')
+    }
+
+    const storeModifications = async () => {
+        setLoading(true)
+        const userCollection = firestore().collection('users')
+        await userCollection.where('id','==',userData.id).get().then(
+            (snapshot) => {
+                snapshot.forEach(doc => {
+                    userCollection.doc(doc.id).update({
+                        smoke:userData.smoke
+                    })
+                })
+            })
     }
 
     return (
         <View style={ProfileStyle.viewMain}>
+            {console.log('visibility: ' + modal)}
             <View style={ProfileStyle.viewHeader}>
                 <Pressable style={ProfileStyle} onPress={()=> returnPress()}>
                     <Icon name={'arrowleft'} color={Colors.orange} size={30}/>
@@ -226,7 +246,8 @@ const mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = {
-    
+    setSmokeInformationAction,
+    setSmokeOptionAction
 }
 
 export default connect(mapStateToProps,mapDispatchToProps)(Profile)
